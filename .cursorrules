@@ -1,0 +1,14 @@
+# Project general coding standards
+
+## Comments
+
+-   Do not add comments for code that is self-explanatory.
+-   You can use comments to highlight things that are very difficult to understand or that require additional context.
+
+## Use `function()` syntax in top-level
+
+When you define a function at module/file level, use `function functionName() {}` syntax.
+
+## Function ordering
+
+Start with the exported function and implement helper functions after it roughly in the order in which they are needed.

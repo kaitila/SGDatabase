@@ -1,5 +1,6 @@
 import * as cheerio from "cheerio";
 import { writeFileSync } from "fs";
+import { InvestorLinkScraper, StartupLinkScraper } from "./src/linkScraper";
 
 const baseUrl = "https://www.eu-startups.com/investor-location";
 const countries = [
@@ -65,12 +66,9 @@ async function scrapeCountry(baseUrl: string, country: string) {
   let pageNumber = 1;
   let hasMorePages = true;
 
-  // Extract country name from URL for filename
-
   console.log(`\n🌍 Starting to scrape ${country}...`);
 
   while (hasMorePages) {
-    // Create batch of links
     const batchLinks = Array.from(
       { length: batchSize },
       (_, i) => `${baseUrl}/page/${pageNumber + i}/?country=${country}`
@@ -84,10 +82,8 @@ async function scrapeCountry(baseUrl: string, country: string) {
       }`
     );
 
-    // Process batch in parallel
     const batchResults = await Promise.all(batchLinks.map(getCompanyListings));
 
-    // Check if any results were found in this batch
     const hasResults = batchResults.some((result) => result.length > 0);
 
     if (!hasResults) {
@@ -96,17 +92,14 @@ async function scrapeCountry(baseUrl: string, country: string) {
       );
       hasMorePages = false;
     } else {
-      // Add results to companies array
       const batchCompanies = batchResults.flat();
       companies.push(...batchCompanies);
       console.log(
         `  ✅ Found ${batchCompanies.length} companies in this ${country} batch`
       );
 
-      // Move to next batch
       pageNumber += batchSize;
 
-      // Small delay between batches to be respectful to the server
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
   }
@@ -170,4 +163,7 @@ function saveToCSV(data: { name: string; link?: string }[], filename: string) {
   console.log(`  💾 Data saved to ${filename}`);
 }
 
-main();
+// main();
+
+const investorLinkScraper = new InvestorLinkScraper("data/investors");
+investorLinkScraper.scrapeAllCountries();
